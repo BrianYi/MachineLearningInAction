@@ -122,8 +122,8 @@ def handWritingClassTest():
     print('the total number of errors is: {0:}'.format(errorCount))
     print('the total error rate is: {0:}'.format(errorCount / float(mTest)))
 
-
-handWritingClassTest()
+file2matrix('datingTestSet.txt')
+# handWritingClassTest()
 # datingClassTest()
 # classifyPerson()
 # datingDataMat, datingLabels = file2matrix('datingTestSet2.txt')
