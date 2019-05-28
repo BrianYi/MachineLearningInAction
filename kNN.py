@@ -29,6 +29,7 @@ def classify0(inX, dataSet, labels, k):
     return sortedClassCount[0][0]
 
 
+
 def file2matrix(filename):
     fr = open(filename)
     arrayOfLines = fr.readlines()
