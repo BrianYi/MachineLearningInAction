@@ -11,10 +11,7 @@ def loadDataSet_iris():
         array -- 标签集
     """
     dataMat, labelMat = load_iris(return_X_y=True)
-    dataMat, labelMat = dataMat[:100, :3], labelMat[:100]
-    dataMat[:, 2] = dataMat[:, 1]
-    dataMat[:, 1] = dataMat[:, 0]
-    dataMat[:, 0] = 1
+    dataMat, labelMat = dataMat[:100,:2], labelMat[:100]
     return dataMat, labelMat
 
 
@@ -22,7 +19,7 @@ def sigmoid(z):
     return 1 / (1+np.exp(-z))
 
 
-def hypo(theta, x):
+def hypo(x, theta):
     """假设函数(hypothesis function)
 
     Arguments:
@@ -46,7 +43,7 @@ def jcost(theta, X, y):
     Returns:
         array -- 代价
     """
-    hX = hypo(theta, X)
+    hX = hypo(X, theta)
     # 元素级乘法获取第一项的值(数组)
     first = np.multiply(y, np.log(hX))
     # 元素级乘法获取第二项的值(数组)
@@ -66,7 +63,7 @@ def partial_jcost(theta, X, y, x):
     Returns:
         array -- 偏导值
     """
-    return np.dot(hypo(theta, X)-y, x)
+    return np.dot(hypo(X, theta)-y, x)
 
 
 def decision_boundary(prob):
@@ -94,7 +91,7 @@ def accuracy_rate(X, y, theta):
     Returns:
         float -- 返回预测准确率
     """
-    y_predict = classify(hypo(theta, X))
+    y_predict = classify(hypo(X, theta))
     trueCount = np.sum(y_predict == y)
     return float(trueCount)/len(y)
 
@@ -122,7 +119,7 @@ def batch_gradient_desc(X, y, alpha=0.01, numIterations=500):
     return theta
 
 
-def stochastic_gradient_desc(X, y, alpha=0.01, numIterations=100):
+def stochastic_gradient_desc(X, y, alpha=0.01, numIterations=50):
     """SGD下降法(随机梯度下降法)
 
     Arguments:
@@ -141,10 +138,11 @@ def stochastic_gradient_desc(X, y, alpha=0.01, numIterations=100):
     theta = np.ones(n)
     # 随机梯度下降法
     for k in range(numIterations):
+        dataIndex = range(m)
         for i in range(m):
-            for j in range(n):
-                theta[j] = theta[j]-alpha * \
-                    partial_jcost(theta, X[i], y[i], X[i, j])
+            alpha = 4/(1.0+k+i)+0.01
+            randIndex = int(np.random.uniform(0,len(dataIndex)))
+            theta=theta-alpha*np.multiply(hypo(X[randIndex], theta)-y[randIndex],X[randIndex])
     return theta
 
 
@@ -219,22 +217,27 @@ def plotBestFit(theta, dataMat, labelMat, title='Gradient Descent', subplt=111):
 if __name__ == "__main__":
     # 读取数据集,标签集
     dataMat, labelMat = loadDataSet_iris()
+    m = len(dataMat)
     # 特征归一化(特征缩放)
-    dataMat[:,-2:]=auto_norm(dataMat[:,-2:])
-    # 交叉验证:产生100个随机数做下标,将数据打乱
-    rndidx = np.arange(100)
+    dataMat[:, :] = auto_norm(dataMat[:, :])
+    # 所有数据的特征增加一列x0为1
+    dataMat = np.column_stack((np.ones(m), dataMat))
+    # 交叉验证:将数据打乱
+    rndidx = np.arange(m)
     np.random.shuffle(rndidx)
     shuffledX = []
     shuffledy = []
-    for i in range(100):
+    for i in range(m):
         shuffledX.append(dataMat[rndidx[i]])
         shuffledy.append(labelMat[rndidx[i]])
     dataMat, labelMat = np.array(shuffledX), np.array(shuffledy)
     X, y = np.array(dataMat), np.array(labelMat)
-    # 获取前50个数据做训练数据,用于训练模型
-    Xtrain, ytrain = np.array(dataMat[:50]), np.array(labelMat[:50])
-    # 获取后50个数据做测试数据,用于测试预测准确率
-    Xtest, ytest = np.array(dataMat[-50:]), np.array(labelMat[-50:])
+    mTrain = int(0.75*m)
+    mTest = m-mTrain
+    # 获取前mTrain个数据做训练数据,用于训练模型
+    Xtrain, ytrain = np.array(dataMat[:mTrain]), np.array(labelMat[:mTrain])
+    # 获取后mTest个数据做测试数据,用于测试预测准确率
+    Xtest, ytest = np.array(dataMat[-mTest:]), np.array(labelMat[-mTest:])
     # 画布大小
     plt.figure(figsize=(13, 6))
     # 使用BGD批量梯度下降法
@@ -249,6 +252,6 @@ if __name__ == "__main__":
     # 拿测试数据放入模型,计算预测准确率
     sgd_acc = accuracy_rate(Xtest, ytest, theta)
     # 绘图
-    plotBestFit(theta, X, y, 'SCD(Stochastic Gradient Descent) accuracy %.2f' %
+    plotBestFit(theta, X, y, 'SGD(Stochastic Gradient Descent) accuracy %.2f' %
                 sgd_acc, 122)
     plt.show()

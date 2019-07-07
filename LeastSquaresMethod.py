@@ -48,7 +48,7 @@ def fitting(M=0):
     # 随机初始化多项式参数
     p_init = np.random.rand(M + 1)
     # 最小二乘法
-    p_lsq = leastsq(residuals_func, p_init, args=(x, y))
+    p_lsq = leastsq(residuals_func_regularization, p_init, args=(x, y))
     # p_lsq = leastsq(residuals_func_regularization, p_init, args=(x, y)) #加入正则化
     print('Fitting Parameters:', p_lsq[0])
 
