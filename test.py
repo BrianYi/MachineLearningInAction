@@ -65,7 +65,7 @@ train_list = data_list[:train_size]
 test_list = data_list[-test_size:]
 
 
-epoch = 5
+epoch = 1
 for i in range(epoch):
     for record in train_list:
         all_values = record.split(',')

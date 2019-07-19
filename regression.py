@@ -123,7 +123,7 @@ def crossValidation(xArr,yArr,numVal=10):
                 testY.append(yArr[indexList[j]].A1)
         wMat = ridgeTest(np.array(trainX)[:,1],trainY)    #get 30 weight vectors from ridge
         for k in range(30):#loop over all of the ridge estimates
-            matTestX = mat(testX); matTrainX=mat(trainX)
+            matTestX = np.mat(testX); matTrainX=np.mat(trainX)
             meanTrain = np.mean(matTrainX,0)
             varTrain = np.var(matTrainX,0)
             matTestX = (matTestX-meanTrain)/varTrain #regularize test with training params
